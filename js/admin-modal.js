@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Redirect to admin dashboard
                 setTimeout(function() {
-                    window.location.href = 'admin_dashboard.php'; // Change to your admin dashboard URL
+                    window.location.href = 'admin-dash.html'; // Change to your admin dashboard URL
                     closeAdminModal();
                 }, 2000);
             } else {
