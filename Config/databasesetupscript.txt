@@ -1,0 +1,142 @@
+-- Create database if not exists
+CREATE DATABASE IF NOT EXISTS portfolio_db;
+
+-- Use the database
+USE portfolio_db;
+
+-- Create admin users table
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,  -- Will store hashed passwords
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    profile_image VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL
+);
+
+-- Create skills table
+CREATE TABLE IF NOT EXISTS skills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    category ENUM('technical', 'soft') NOT NULL,
+    icon VARCHAR(50),
+    proficiency INT NOT NULL,  -- Percentage value (0-100)
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create projects table
+CREATE TABLE IF NOT EXISTS projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    category ENUM('web', 'mobile', 'design', 'other') NOT NULL,
+    image VARCHAR(255),
+    github_link VARCHAR(255),
+    live_link VARCHAR(255),
+    technologies VARCHAR(255),  -- Comma-separated list of technologies used
+    featured BOOLEAN DEFAULT FALSE,
+    completion_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create blog posts table
+CREATE TABLE IF NOT EXISTS blog_posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    content TEXT NOT NULL,
+    excerpt TEXT,
+    featured_image VARCHAR(255),
+    tags VARCHAR(255),  -- Comma-separated list of tags
+    status ENUM('draft', 'published') DEFAULT 'draft',
+    views INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at TIMESTAMP NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create contact messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('unread', 'read', 'replied') DEFAULT 'unread',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP NULL,
+    replied_at TIMESTAMP NULL
+);
+
+-- Create site settings table
+CREATE TABLE IF NOT EXISTS site_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_name VARCHAR(50) NOT NULL UNIQUE,
+    setting_value TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Insert default admin user (password is 'admin123' - you should change this)
+-- Note: In production, you would hash this password. This is just for initial setup.
+INSERT INTO admin_users (username, password, full_name, email)
+VALUES ('admin', '$2y$10$8IFLuBxOg.9QKh/D5gbMVuh8qfqjR3.l9nZO3IqI2ZV5OZ5F.3Ddu', 'Fredrick Kiprono', 'mutaifred13@gmail.com')
+ON DUPLICATE KEY UPDATE id = id;
+
+-- Insert initial skills
+INSERT INTO skills (name, category, icon, proficiency, display_order)
+VALUES 
+    ('HTML5', 'technical', 'fa-html5', 90, 1),
+    ('CSS3', 'technical', 'fa-css3-alt', 85, 2),
+    ('JavaScript', 'technical', 'fa-js', 80, 3),
+    ('React', 'technical', 'fa-react', 75, 4),
+    ('Node.js', 'technical', 'fa-node-js', 70, 5),
+    ('MongoDB', 'technical', 'fa-database', 65, 6),
+    ('Teamwork', 'soft', 'fa-users', 95, 1),
+    ('Communication', 'soft', 'fa-comments', 90, 2),
+    ('Problem Solving', 'soft', 'fa-tasks', 85, 3),
+    ('Time Management', 'soft', 'fa-clock', 80, 4)
+ON DUPLICATE KEY UPDATE id = id;
+
+-- Insert sample projects
+INSERT INTO projects (title, description, category, technologies, featured, completion_date)
+VALUES 
+    ('Portfolio Website', 'A responsive portfolio website showcasing my skills and projects. Built with modern web technologies and best practices.', 'web', 'HTML, CSS, JavaScript', TRUE, '2025-03-01'),
+    ('E-commerce Mobile App', 'A mobile application for online shopping with user authentication, product catalog, and secure payment processing.', 'mobile', 'React Native, Firebase', FALSE, '2024-11-15'),
+    ('Corporate Website Redesign', 'A complete redesign of a corporate website focusing on user experience and modern design principles.', 'design', 'Figma, HTML, CSS, JavaScript', TRUE, '2024-09-20')
+ON DUPLICATE KEY UPDATE id = id;
+
+-- Insert sample blog posts
+INSERT INTO blog_posts (title, slug, content, excerpt, tags, status, published_at)
+VALUES 
+    ('Getting Started with React', 'getting-started-with-react', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum...', 'A beginner-friendly guide to setting up and understanding React fundamentals.', 'react, javascript, frontend', 'published', NOW()),
+    ('The Importance of Responsive Design', 'importance-of-responsive-design', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum...', 'Exploring why responsive design matters in today\'s multi-device world.', 'design, css, mobile', 'published', NOW()),
+    ('Introduction to Node.js', 'introduction-to-nodejs', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum...', 'Learn the basics of Node.js and how to build your first server.', 'nodejs, javascript, backend', 'draft', NULL)
+ON DUPLICATE KEY UPDATE id = id;
+
+-- Insert default site settings
+INSERT INTO site_settings (setting_name, setting_value)
+VALUES 
+    ('site_title', 'Fredrick Kiprono - Portfolio'),
+    ('site_description', 'Portfolio of Fredrick Kiprono - Systems Applications Support Analyst'),
+    ('intro_text', 'A passionate systems applications support analyst focused on creating interactive digital experiences.'),
+    ('about_text', 'Hello! I\'m a passionate web developer with a strong foundation in both frontend and backend technologies. My journey in the tech world began with a curiosity about how websites work, which led me to pursue a career in web development.\n\nI specialize in creating responsive, user-friendly websites and applications that not only look great but also provide an excellent user experience. My approach combines creativity with technical expertise to deliver solutions that meet and exceed client expectations.\n\nWhen I\'m not coding, you can find me exploring new technologies, contributing to open-source projects, or enjoying outdoor activities.'),
+    ('contact_email', 'mutaifred13@gmail.com'),
+    ('contact_phone', '+254 728634318'),
+    ('contact_location', 'Nairobi, Kenya'),
+    ('github_link', 'https://github.com/kipronoM'),
+    ('linkedin_link', 'https://www.linkedin.com/in/fredrick-kiprono-379463200/'),
+    ('twitter_link', 'https://twitter.com/')
+ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
+
+-- Indexes for better performance
+ALTER TABLE skills ADD INDEX idx_category (category);
+ALTER TABLE projects ADD INDEX idx_category (category);
+ALTER TABLE projects ADD INDEX idx_featured (featured);
+ALTER TABLE blog_posts ADD INDEX idx_status (status);
+ALTER TABLE blog_posts ADD INDEX idx_slug (slug);
+ALTER TABLE contact_messages ADD INDEX idx_status (status);

@@ -5,13 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginStatus = document.getElementById('loginStatus');
     const closeBtn = adminLoginModal.querySelector('.close');
     
-    // Admin credentials (in a real application, this would be handled server-side)
-    // This is just for demonstration - in production, never store credentials in frontend code
-    const adminCredentials = {
-        username: 'admin',
-        password: 'password123'
-    };
-    
     // Function to open the modal
     function openAdminModal() {
         adminLoginModal.style.display = 'flex';
@@ -51,24 +44,49 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         
-        // Validate credentials (for demo purposes only)
-        if (username === adminCredentials.username && password === adminCredentials.password) {
-            loginStatus.textContent = 'Login successful! Redirecting to admin dashboard...';
-            loginStatus.className = 'form-status success';
-            
-            // Simulate redirect (in a real app, this would redirect to an admin panel)
-            setTimeout(function() {
-                window.location.href = '#'; // Change this to your admin dashboard URL
-                closeAdminModal();
-            }, 2000);
-        } else {
-            loginStatus.textContent = 'Invalid username or password. Please try again.';
+        // Show loading state
+        loginStatus.textContent = 'Verifying...';
+        loginStatus.className = 'form-status loading';
+        
+        // Create form data for sending
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        
+        // Send AJAX request to validate credentials
+        fetch('validate_admin.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                loginStatus.textContent = 'Login successful! Redirecting to admin dashboard...';
+                loginStatus.className = 'form-status success';
+                
+                // Redirect to admin dashboard
+                setTimeout(function() {
+                    window.location.href = 'admin_dashboard.php'; // Change to your admin dashboard URL
+                    closeAdminModal();
+                }, 2000);
+            } else {
+                loginStatus.textContent = data.message || 'Invalid username or password. Please try again.';
+                loginStatus.className = 'form-status error';
+            }
+        })
+        .catch(error => {
+            loginStatus.textContent = 'An error occurred. Please try again later.';
             loginStatus.className = 'form-status error';
-        }
+            console.error('Error:', error);
+        });
     });
     
-    // You could also add a visible admin login link somewhere in your site:
-    // Example: Create a hidden footer link that only appears on hover
+    // Add a hidden footer link that only appears on hover
     const footer = document.querySelector('footer');
     
     if (footer) {
